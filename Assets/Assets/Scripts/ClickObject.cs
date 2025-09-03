@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class ClickObject : MonoBehaviour
 {
-    public PlayerEvent_1 playerEvent;
-    public ObjectEvent_1 objectEvent;
+    public PlayerEvent playerEvent;
+    public ObjectEvent objectEvent;
 
     [SerializeField] private string methodName;
     [SerializeField] private string objectName;

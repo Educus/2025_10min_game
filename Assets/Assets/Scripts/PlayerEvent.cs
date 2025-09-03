@@ -8,7 +8,7 @@ public class PlayerEvent : MonoBehaviour
     protected bool getItem = false;
     public bool eventPlayer { get; protected set; } = false;
 
-    private void Start()
+    protected virtual void Start()
     {
         player = GetComponent<Player>();
     }
@@ -23,6 +23,19 @@ public class PlayerEvent : MonoBehaviour
         {
             t += Time.deltaTime / time;
             player.transform.position = Vector3.Lerp(start, target, t);
+            yield return null;
+        }
+    }
+    protected IEnumerator IEObjMove(GameObject obj, Vector2 moveOffset, float time)
+    {
+        Vector3 start = obj.transform.position;
+        Vector3 target = obj.transform.position + new Vector3(moveOffset.x, moveOffset.y);
+
+        float t = 0;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / time;
+            obj.transform.position = Vector3.Lerp(start, target, t);
             yield return null;
         }
     }

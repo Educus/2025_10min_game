@@ -21,7 +21,7 @@ public class Player : MonoBehaviour
     public bool behind = false;
     public bool objBreak = false;
 
-    void Start()
+    void Awake()
     {
         sprite = GetComponent<SpriteRenderer>();
         startPos = transform.position;
