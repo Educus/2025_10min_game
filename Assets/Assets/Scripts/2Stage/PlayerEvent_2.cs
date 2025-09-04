@@ -7,7 +7,8 @@ public class PlayerEvent_2 : PlayerEvent
 {
     // yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 1f));
 
-    private bool getSeed = false;
+    private bool onSeed = false;
+    public bool getSeed { get; private set; } = false;
     public IEnumerator IESeed() // 씨앗
     {
         eventPlayer = true;
@@ -15,7 +16,7 @@ public class PlayerEvent_2 : PlayerEvent
         // 아이템을 들고 있는 경우
         if (getItem)
         {
-            yield return StartCoroutine(IEAnim("Player_Unknown"));
+            yield return StartCoroutine(IEAnim($"GrapUnknown{num}"));
 
             yield return new WaitForSeconds(0.5f);
             eventPlayer = false;
@@ -23,16 +24,33 @@ public class PlayerEvent_2 : PlayerEvent
             yield break;
         }
 
-        // 변신한 상태인 경우
-        if (onTrans)
+        // 이미 상호작용 한 경우
+        if (onSeed)
         {
-            yield return StartCoroutine(IEAnim("Player_Unknown"));
+            // 변신한 상태인 경우
+            if (onTrans)
+            {
+                string unknow = "Unknown" + this.num;
 
-            yield return new WaitForSeconds(0.5f);
-            eventPlayer = false;
+                yield return StartCoroutine(IEAnim(unknow));
 
-            yield break;
+                yield return new WaitForSeconds(0.5f);
+                eventPlayer = false;
+
+                yield break;
+            }
+            else
+            {
+                yield return StartCoroutine(IEAnim("Player_Unknown"));
+
+                yield return new WaitForSeconds(0.5f);
+                eventPlayer = false;
+
+                yield break;
+            }
         }
+
+        onSeed = true;
 
         player.move = true;
         yield return StartCoroutine(IEMove(new Vector2(-5.85f, -5.65f), 1.5f));
@@ -42,6 +60,7 @@ public class PlayerEvent_2 : PlayerEvent
         yield return StartCoroutine(IEAnim("Player_Grap"));
         getItem = true;
         getSeed = true;
+        player.anim.SetBool("Grap", true);
 
         player.move = true;
         player.right = true;
@@ -52,16 +71,16 @@ public class PlayerEvent_2 : PlayerEvent
         eventPlayer = false;
     }
 
-    [SerializeField] private GameObject[] objMouseEat;
+    [SerializeField] private ObjectMouseEat objMouseEat;
     public bool onMouseEat { get; private set; } = false;
     public IEnumerator IEMouseEat() // 쥐 먹이주기
     {
         eventPlayer = true;
 
         // 물건을 들었는데 씨앗이 아닌 경우
-        if (!getSeed)
+        if (getItem && !getSeed)
         {
-            yield return StartCoroutine(IEAnim("Player_Unknown"));
+            yield return StartCoroutine(IEAnim($"GrapUnknown{num}"));
 
             yield return new WaitForSeconds(0.5f);
             eventPlayer = false;
@@ -69,8 +88,19 @@ public class PlayerEvent_2 : PlayerEvent
             yield break;
         }
 
-        // 변신한 상태인 경우
-        if (onTrans)
+        // 물건을 안든경우
+        if (onTrans && !getItem)
+        {
+            string unknow = "Unknown" + this.num;
+
+            yield return StartCoroutine(IEAnim(unknow));
+
+            yield return new WaitForSeconds(0.5f);
+            eventPlayer = false;
+
+            yield break;
+        }
+        else if (!onTrans && !getItem)
         {
             yield return StartCoroutine(IEAnim("Player_Unknown"));
 
@@ -82,26 +112,30 @@ public class PlayerEvent_2 : PlayerEvent
 
         player.move = true;
         player.behind = true;
-        yield return StartCoroutine(IEMove(new Vector2(-1.6f, -0.5f), 1.2f));
+        yield return StartCoroutine(IEMove(new Vector2(-1.6f, -0.5f), 0.7f));
         player.behind = false;
         player.move = false;
 
         // 먹이 주기
+        StartCoroutine(IEAnim("Set_Seed"));
         getItem = false;
         getSeed = false;
+        player.anim.SetBool("Grap", false);
 
         // 먹이통 열리는 애니메이션 실행
-        yield return new WaitForSeconds(1f);
+        yield return StartCoroutine(objMouseEat.IEOnMouseEat());
 
-        // 기계들 전원 켜지기
-        yield return new WaitForSeconds(1f);
-        onMouseEat = true;
 
         player.move = true;
         player.right = true;
-        yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 1.2f));
+        yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 0.7f));
         player.right = false;
         player.move = false;
+
+        yield return new WaitForSeconds(2f);
+
+        // 기계들 전원 켜지기
+        onMouseEat = true;
 
         eventPlayer = false;
     }
@@ -116,12 +150,12 @@ public class PlayerEvent_2 : PlayerEvent
         // 4번을 눌렀을 경우
         if (num == 4)
         {
-            StartCoroutine(IETrasnMachineReturn());
+            StartCoroutine(IETrasnMachineReturn(num));
 
             yield break;
         }
-        // 먹이 안준 경우, 이미 변신 한 경우, 물건을 든 경우
-        if (!onMouseEat || onTrans || getItem)
+        // 먹이 안준 경우, 변신 안한 상태에서 물건을 들고 2번으로 변신할 경우
+        if (!onMouseEat || (!onTrans && (getItem && num == 2)))
         {
             yield return StartCoroutine(IEAnim("Player_Unknown"));
 
@@ -131,12 +165,22 @@ public class PlayerEvent_2 : PlayerEvent
             yield break;
         }
 
+        // 변신한 상태인 경우
+        if(onTrans)
+        {
+            string unknow = "Unknown" + this.num;
+
+            yield return StartCoroutine(IEAnim(unknow));
+
+            yield return new WaitForSeconds(0.5f);
+            eventPlayer = false;
+
+            yield break;
+        }
+
         // 변신기계 내려오는 애니메이션
         yield return new WaitForSeconds(0.5f);
-        transMachine.transform.position += new Vector3(0, -1.3f);
-
-        yield return new WaitForSeconds(0.1f);
-        transMachine.transform.position += new Vector3(0, -6f);
+        transMachine.transform.position += new Vector3(0, -7.3f);
 
         // 해당 캐릭터 변신
         onTrans = true;
@@ -151,13 +195,12 @@ public class PlayerEvent_2 : PlayerEvent
         eventPlayer = false;
     }
 
-    [SerializeField] private GameObject[] transScreen4; // 변신 화면들
-    public IEnumerator IETrasnMachineReturn() // 변신 해제
+    public IEnumerator IETrasnMachineReturn(int num) // 변신 해제
     {
         eventPlayer = true;
 
-        // 먹이 안준 경우, 변신을 안한 경우 물건을 든 경우
-        if (!onMouseEat || !onTrans || getItem)
+        // 먹이 안준 경우, 변신을 안한 경우
+        if (!onMouseEat || !onTrans)
         {
             yield return StartCoroutine(IEAnim("Player_Unknown"));
 
@@ -176,6 +219,7 @@ public class PlayerEvent_2 : PlayerEvent
 
         // 모든 캐릭터 변신 해제
         onTrans = false;
+        this.num = num;
         for (int i = 1; i < 4; i++)
         {
             string transNum = "isTrans" + i;
@@ -191,13 +235,29 @@ public class PlayerEvent_2 : PlayerEvent
 
     [SerializeField] private GameObject laserPlate;
     [SerializeField] private GameObject laserWire;
+    private bool onLaserPlate = false;
     public IEnumerator IELaserPlate() // 레이저 판
     {
         eventPlayer = true;
 
         // 변신을 했는데 2번이 아닌 경우
-        if (!(onTrans && num == 2))
+        if (onTrans)
         {
+            if (!(num == 2))
+            {
+                string unknow = "Unknown" + this.num;
+
+                yield return StartCoroutine(IEAnim(unknow));
+
+                yield return new WaitForSeconds(0.5f);
+                eventPlayer = false;
+
+                yield break;
+            }
+        }
+        else 
+        {
+            // 변신을 안한 경우
             yield return StartCoroutine(IEAnim("Player_Unknown"));
         
             yield return new WaitForSeconds(0.5f);
@@ -214,9 +274,10 @@ public class PlayerEvent_2 : PlayerEvent
 
         // 레이저 판 파괴 애니메이션
         // 애니메이션에 물건 파괴 이벤트 넣기
-        yield return StartCoroutine(IEAnim("Player_Click"));
+        yield return StartCoroutine(IEAnim("Strong_Break"));
         laserWire.SetActive(true);
         yield return StartCoroutine(IEPlate());
+        onLaserPlate = true;
 
         player.move = true;
         yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 1f));
@@ -260,15 +321,85 @@ public class PlayerEvent_2 : PlayerEvent
         }
     }
 
+    [SerializeField] private GameObject objNipper;
+    public bool getNipper { get; private set; } = false;
+    public IEnumerator IENipper()
+    {
+        eventPlayer = true;
+
+        string animName = null;
+
+        // 레이저판 안부순경우
+        if (getItem)
+        {
+            animName = $"GrapUnknown{num}";
+        }
+        else if (!onLaserPlate)
+        {
+            animName = onTrans ? $"Unknown{num}" : "Player_Unknown";
+        }
+        else if (onTrans && num != 1) // 변신을 했는데 1이 아닌 경우
+        {
+            animName = $"Unknown{num}";
+        }
+        else if (!onTrans) // 변신을 안한경우
+        {
+            animName = "Player_Unknown";
+        }
+
+        if (animName != null) // 공통 애니메이션 처리
+        {
+            yield return StartCoroutine(IEAnim(animName));
+
+            yield return new WaitForSeconds(0.5f);
+            eventPlayer = false;
+
+            yield break;
+        }
+
+        player.move = true;
+        yield return StartCoroutine(IEMove(new Vector2(-7.55f, 1f), 2f));
+        player.anim.SetBool("Grap",true);
+        getItem = true;
+        getNipper = true;
+        objNipper.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
+
+        yield return new WaitForSeconds(1f);
+
+        player.right = true;
+        yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 1.5f));
+        player.right = false;
+        player.move = false;
+
+        objNipper.SetActive(false);
+
+        eventPlayer = false;
+    }
+
     private bool onLasetWire = false;
+    [SerializeField] MyItem2 myNipper;
     public IEnumerator IELaserWire() // 레이저 전선
     {
         eventPlayer = true;
 
-        // 변신을 했는데 3번이 아닌 경우
-        if (!(onTrans && num == 3))
+        if (onTrans)
         {
-            // 손대고 감전
+            // 변신을 했는데 3번이 아닌 경우
+            if (!(num == 3))
+            {
+                string unknow = "Unknown" + this.num;
+
+                yield return StartCoroutine(IEAnim(unknow));
+
+                yield return new WaitForSeconds(0.5f);
+                eventPlayer = false;
+
+                yield break;
+            }
+        }
+        else
+        {
+            // 변신을 안한 경우
             yield return StartCoroutine(IEAnim("Player_Unknown"));
 
             yield return new WaitForSeconds(0.5f);
@@ -277,27 +408,89 @@ public class PlayerEvent_2 : PlayerEvent
             yield break;
         }
 
+        // 니퍼가 없을 경우
+        if (!getNipper)
+        {
+            if (onTrans)
+            {
+                string unknow = "Unknown" + this.num;
 
+                yield return StartCoroutine(IEAnim(unknow));
 
+                yield return new WaitForSeconds(0.5f);
+                eventPlayer = false;
+
+                yield break;
+            }
+            else
+            {
+                yield return StartCoroutine(IEAnim("Player_Unknown"));
+
+                yield return new WaitForSeconds(0.5f);
+                eventPlayer = false;
+
+                yield break;
+            }
+        }
+
+        player.move = true;
+        player.right = true;
+        yield return StartCoroutine(IEMove(new Vector2(5.65f, -6f), 1.8f));
+
+        player.anim.SetBool("UseNipper", true);
+        myNipper.UseNipper();
+
+        yield return new WaitForSeconds(2f);
+        getItem = false;
+        getNipper = false;
+        player.anim.SetBool("Grap", false);
+        onLasetWire = true;
+
+        player.right = false;
+        player.anim.SetBool("UseNipper", false);
+
+        yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 1.8f));
+        player.move = false;
 
         eventPlayer = false;
     }
+
+    [SerializeField] ObjectEvent_2 doorEvent;
+    private bool onDoor = false;
     public IEnumerator IEDoor() // 문
     {
-        // 변신을 한 경우
-        if (onTrans)
+        eventPlayer = true;
+
+        if (onDoor)
         {
-            yield return StartCoroutine(IEAnim("Player_Unknown"));
-
-            yield return new WaitForSeconds(0.5f);
-            eventPlayer = false;
-
-            yield break;
+            // 탈출
         }
-        else if (!onLasetWire) // 레이저 전선 해결안한 경우
+        else
         {
-            // 걸어가다 감전?
+            player.move = true;
+            player.right = true;
+            yield return StartCoroutine(IEMove(new Vector2(2f, -3.65f), 0.6f));
+            yield return StartCoroutine(IEMove(new Vector2(6f, -2.35f), 1f));
+            player.move = false;
+            player.right = false;
+
+            if (onLasetWire) // 레이저 전선 해결한 경우
+            {
+                onDoor = true;
+                StartCoroutine(doorEvent.IEAnim());
+            }
+            else
+            {
+                // 감전
+                yield return StartCoroutine(IEAnim("Player_Shock"));
+
+                player.move = true;
+                yield return StartCoroutine(IEMove(new Vector2(2f, -3.65f), 1f));
+                yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 0.6f));
+                player.move = false;
+            }
         }
 
+        eventPlayer = false;
     }
 }

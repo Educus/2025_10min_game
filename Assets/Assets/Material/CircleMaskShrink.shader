@@ -1,15 +1,18 @@
-Shader "UI/CircleMaskShrink"
+ï»¿Shader "Custom/CircleMask"
 {
     Properties
     {
-        _Color("Tint", Color) = (0,0,0,0.8)       // °ËÀº»ö ¿µ¿ª »ö»ó
-        _Center("Center", Vector) = (0.5, 0.5, 0, 0)  // ¿ø Áß½É (UV ÁÂÇ¥)
-        _Radius("Radius", Float) = 1.0            // ÇöÀç ¹İÁö¸§ (1 ¡æ 0)
+        _Center ("Center", Vector) = (0.5, 0.5, 0, 0)
+        _Radius ("Radius", Float) = 0.5
+        _Aspect ("Aspect", Float) = 1.0
+        _Color ("Color", Color) = (0,0,0,1)
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Transparent" "Queue"="Overlay" }
         Blend SrcAlpha OneMinusSrcAlpha
+        Cull Off ZWrite Off ZTest Always
+
         Pass
         {
             CGPROGRAM
@@ -17,14 +20,24 @@ Shader "UI/CircleMaskShrink"
             #pragma fragment frag
             #include "UnityCG.cginc"
 
-            struct appdata { float4 vertex : POSITION; float2 uv : TEXCOORD0; };
-            struct v2f { float2 uv : TEXCOORD0; float4 vertex : SV_POSITION; };
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
 
-            fixed4 _Color;
-            float4 _Center;
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+            };
+
+            float2 _Center;
             float _Radius;
+            float _Aspect;
+            fixed4 _Color;
 
-            v2f vert(appdata v)
+            v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
@@ -34,13 +47,17 @@ Shader "UI/CircleMaskShrink"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float dist = distance(i.uv, _Center.xy);
+                float2 diff = i.uv - _Center;
+                diff.x *= _Aspect; // ì¢…íš¡ë¹„ ë³´ì •
 
-                // ¹İÁö¸§ ¹Ù±ùÀº °ËÀº»ö, ¹İÁö¸§ ¾ÈÂÊÀº Åõ¸í
-                if (dist > _Radius)
-                    return _Color;     // ¹İÁö¸§ ¹Û: °ËÀº»ö
-                else
-                    return fixed4(0,0,0,0); // ¹İÁö¸§ ¾È: Åõ¸í
+                float dist = length(diff);
+
+                // ì› ì•ˆìª½ì€ íˆ¬ëª…
+                if (dist < _Radius)
+                    return fixed4(0,0,0,0);
+
+                // ì› ë°”ê¹¥ì€ ê²€ì€ìƒ‰
+                return _Color;
             }
             ENDCG
         }

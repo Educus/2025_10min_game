@@ -15,10 +15,14 @@ public class ObjectEvent : MonoBehaviour
 
     public IEnumerator IEAnim() // 공통 애니메이션 트리거
     {
+        eventObject = true;
+
         anim.SetBool("OnAnim", true);
 
         yield return new WaitForSeconds(0.1f);
 
         anim.SetBool("OnAnim", false);
+
+        eventObject = false;
     }
 }

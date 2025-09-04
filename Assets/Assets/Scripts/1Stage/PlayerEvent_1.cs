@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerEvent_1 : PlayerEvent
 {
@@ -32,7 +33,7 @@ public class PlayerEvent_1 : PlayerEvent
         eventPlayer = false;
     }
 
-    private bool onLight = false; // 상호작용 여부
+    public bool onLight { get; private set; } = false; // 상호작용 여부
     [SerializeField] private GameObject[] lightButton; // 켜지는것들
     public IEnumerator IEButton() // 불켜기
     {
@@ -331,22 +332,32 @@ public class PlayerEvent_1 : PlayerEvent
         cardTap.SetActive(true);
         StartCoroutine(cardTapEvent.IEAnim());
 
+        yield return StartCoroutine(IEDoor());
+
         eventPlayer = false;
     }
 
+    [SerializeField] private CircleMaskShrinkController maskController;
     public IEnumerator IEDoor() // 문
     {
-        if (!restraint)
-        {
-            yield return StartCoroutine(IEAnim("Player_Unknown_Restraint"));
-            eventPlayer = false;
-            yield break;
-        }
+        eventPlayer = true;
 
-        if (onCardTap)
+        // if (!restraint)
+        // {
+        //     yield return StartCoroutine(IEAnim("Player_Unknown_Restraint"));
+        //     eventPlayer = false;
+        //     yield break;
+        // }
+
+        if (!onCardTap)
         {
             // 탈출!
             Debug.Log("탈출");
+            yield return StartCoroutine(maskController.ShrinkRoutine());
+
+            yield return new WaitForSeconds(3f);
+
+            SceneManager.LoadScene("2Stage");
         }
         else
         {
@@ -355,5 +366,7 @@ public class PlayerEvent_1 : PlayerEvent
             yield return new WaitForSeconds(0.5f);
             eventPlayer = false;
         }
+
+        eventPlayer = false;
     }
 }
