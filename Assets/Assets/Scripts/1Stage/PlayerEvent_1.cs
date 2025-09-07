@@ -56,7 +56,6 @@ public class PlayerEvent_1 : PlayerEvent
             yield break;
         }
 
-        onLight = true;
 
         player.move = true;
         yield return StartCoroutine(IEMove(new Vector2(-3.9f, -4f), 1f));
@@ -71,6 +70,7 @@ public class PlayerEvent_1 : PlayerEvent
         yield return StartCoroutine(IEAnim("Player_Click"));
         lightButton[0].SetActive(true);
         lightButton[1].SetActive(true);
+        onLight = true;
 
         player.move = true;
         yield return StartCoroutine(IEMove(new Vector2(-3f, -2f), 1.2f));

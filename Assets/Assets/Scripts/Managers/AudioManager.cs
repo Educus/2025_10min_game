@@ -7,16 +7,21 @@ public class AudioManager : Singleton<AudioManager>
     [SerializeField] private AudioSource effectSource;
     [SerializeField] private AudioSource scenerySource;
 
+    [SerializeField] private AudioClip titleSound;
     [SerializeField] private Image image;
     [SerializeField] private Sprite[] sprite;
-    private void Start()
+    protected override void Awake()
     {
-        Scenery("Title_Sound");
-    }
-    public void Scenery(string soundName)
-    {
-        scenerySource.clip = Resources.Load<AudioClip>(soundName);
+        base.Awake();
 
+        titleSound = Resources.Load<AudioClip>("Scenery");
+        // titleSound = Resources.Load<AudioClip>("Title_Sound");
+
+        Scenery(titleSound);
+    }
+    public void Scenery(AudioClip clip)
+    {
+        scenerySource.clip = clip;
         scenerySource.loop = true;
         scenerySource.Play();
     }
@@ -29,6 +34,7 @@ public class AudioManager : Singleton<AudioManager>
 
     public void StopSound()
     {
+        scenerySource.Stop();
         effectSource.Stop();
     }
 

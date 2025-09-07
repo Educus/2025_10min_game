@@ -1,13 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
     private static T instance;
+    private static bool applicationIsQuitting = false;
 
     public static T Instance
     {
         get
         {
+            if (applicationIsQuitting)
+            {
+                Debug.LogWarning($"[Singleton] Instance '{typeof(T)}' already destroyed on application quit.");
+                return null;
+            }
+
             return instance;
         }
     }
@@ -16,14 +25,17 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
         if (instance == null)
         {
-            instance = (T)FindObjectOfType(typeof(T));
+            instance = this as T;
+            DontDestroyOnLoad(gameObject);
         }
-        else
+        else if (instance != this)
         {
-            Destroy(gameObject);
-            return;
+            Destroy(gameObject); // 중복 제거
         }
+    }
 
-        DontDestroyOnLoad(instance.gameObject);
+    protected virtual void OnApplicationQuit()
+    {
+        applicationIsQuitting = true;
     }
 }

@@ -73,7 +73,7 @@ public class Title : MonoBehaviour
 
     private void OnDisable()
     {
-        AudioManager.Instance.Scenery(null);
+        AudioManager.Instance.StopSound();
     }
 
     public void SoundChange()
