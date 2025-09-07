@@ -144,6 +144,7 @@ public class PlayerEvent_1 : PlayerEvent
     private bool getLadder = false;
     [SerializeField] private GameObject objLadder;
     [SerializeField] private GameObject myLadder;
+    [SerializeField] private ObjectGlass objectGlass;
     public IEnumerator IELadder() // 사다리
     {
         eventPlayer = true;
@@ -183,6 +184,7 @@ public class PlayerEvent_1 : PlayerEvent
             // 부수는 애니메이션
             player.right = true;
             player.objBreak = true;
+            objectGlass.BreakGlass();
             yield return StartCoroutine(IEAnim("Player_Break_Left"));
             myFire.SetActive(false);
             player.right = false;
@@ -332,7 +334,7 @@ public class PlayerEvent_1 : PlayerEvent
         cardTap.SetActive(true);
         StartCoroutine(cardTapEvent.IEAnim());
 
-        yield return StartCoroutine(IEDoor());
+        // yield return StartCoroutine(IEDoor());
 
         eventPlayer = false;
     }
@@ -342,14 +344,14 @@ public class PlayerEvent_1 : PlayerEvent
     {
         eventPlayer = true;
 
-        // if (!restraint)
-        // {
-        //     yield return StartCoroutine(IEAnim("Player_Unknown_Restraint"));
-        //     eventPlayer = false;
-        //     yield break;
-        // }
+        if (!restraint)
+        {
+            yield return StartCoroutine(IEAnim("Player_Unknown_Restraint"));
+            eventPlayer = false;
+            yield break;
+        }
 
-        if (!onCardTap)
+        if (onCardTap)
         {
             // 탈출!
             Debug.Log("탈출");

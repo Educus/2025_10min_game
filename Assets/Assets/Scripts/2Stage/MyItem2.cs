@@ -7,8 +7,9 @@ public class MyItem2 : MonoBehaviour
     [SerializeField] Player player;
     [SerializeField] PlayerEvent_2 playerEvent;
 
-    [SerializeField] GameObject[] arm;
-    [SerializeField] GameObject[] flyArm;
+    // [SerializeField] GameObject[] arm;
+    // [SerializeField] GameObject[] flyArm;
+    // [SerializeField] GameObject[] strongArm;
     [SerializeField] GameObject[] seed;
     [SerializeField] GameObject[] nipper;
     void Start()
@@ -35,11 +36,23 @@ public class MyItem2 : MonoBehaviour
     {
         if (player.move && !player.behind)
         {
+            /*
             // Arm 전환
             if (playerEvent.num == 1)
             {
                 flyArm[0].SetActive(false);
                 flyArm[1].SetActive(true);
+                strongArm[0].SetActive(false);
+                strongArm[1].SetActive(false);
+                arm[0].SetActive(false);
+                arm[1].SetActive(false);
+            }
+            else if (playerEvent.num == 2)
+            {
+                flyArm[0].SetActive(false);
+                flyArm[1].SetActive(false);
+                strongArm[0].SetActive(false);
+                strongArm[1].SetActive(true);
                 arm[0].SetActive(false);
                 arm[1].SetActive(false);
             }
@@ -47,18 +60,24 @@ public class MyItem2 : MonoBehaviour
             {
                 flyArm[0].SetActive(false);
                 flyArm[1].SetActive(false);
+                strongArm[0].SetActive(false);
+                strongArm[1].SetActive(false);
                 arm[0].SetActive(false);
                 arm[1].SetActive(true);
             }
+            */
 
             // 아이템 전환
             item[0].SetActive(false);
             item[1].SetActive(true);
-
+            
             // 방향에 따라 플립 & 위치 조정
             bool flip = player.right;
+            /*
             flyArm[1].GetComponent<SpriteRenderer>().flipX = flip;
+            strongArm[1].GetComponent<SpriteRenderer>().flipX = flip;
             arm[1].GetComponent<SpriteRenderer>().flipX = flip;
+            */
 
             float x = Mathf.Abs(item[1].transform.localPosition.x);
             if (!flip) x = -x;
@@ -67,22 +86,36 @@ public class MyItem2 : MonoBehaviour
         }
         else if (!player.move)
         {
+            /*
             // Arm 복구
             if (playerEvent.num == 1)
             {
                 flyArm[0].SetActive(true);
                 flyArm[1].SetActive(false);
+                strongArm[0].SetActive(false);
+                strongArm[1].SetActive(false);
                 arm[0].SetActive(false);
+                arm[1].SetActive(false);
+            }
+            else if (playerEvent.num == 1)
+            {
+                flyArm[0].SetActive(false);
+                flyArm[1].SetActive(false);
+                strongArm[0].SetActive(true);
+                strongArm[1].SetActive(false);
+                arm[0].SetActive(true);
                 arm[1].SetActive(false);
             }
             else
             {
                 flyArm[0].SetActive(false);
                 flyArm[1].SetActive(false);
+                strongArm[0].SetActive(false);
+                strongArm[1].SetActive(false);
                 arm[0].SetActive(true);
                 arm[1].SetActive(false);
             }
-
+            */
             // 아이템 복구
             item[0].SetActive(true);
             item[1].SetActive(false);
@@ -95,10 +128,14 @@ public class MyItem2 : MonoBehaviour
 
     private void AllOff()
     {
+        /*
         arm[0].SetActive(false);
         arm[1].SetActive(false);
+        strongArm[0].SetActive(false);
+        strongArm[1].SetActive(false);
         flyArm[0].SetActive(false);
         flyArm[1].SetActive(false);
+        */
         seed[0].SetActive(false);
         seed[1].SetActive(false);
         nipper[0].SetActive(false);

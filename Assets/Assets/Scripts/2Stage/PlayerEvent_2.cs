@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerEvent_2 : PlayerEvent
 {
@@ -30,7 +31,11 @@ public class PlayerEvent_2 : PlayerEvent
             // 변신한 상태인 경우
             if (onTrans)
             {
-                string unknow = "Unknown" + this.num;
+                string unknow;
+                if (getItem)
+                    unknow = "GrapUnknown" + this.num;
+                else
+                    unknow = "Unknown" + this.num;
 
                 yield return StartCoroutine(IEAnim(unknow));
 
@@ -154,10 +159,13 @@ public class PlayerEvent_2 : PlayerEvent
 
             yield break;
         }
-        // 먹이 안준 경우, 변신 안한 상태에서 물건을 들고 2번으로 변신할 경우
-        if (!onMouseEat || (!onTrans && (getItem && num == 2)))
+        // 먹이 안준 경우
+        if (!onMouseEat)
         {
-            yield return StartCoroutine(IEAnim("Player_Unknown"));
+            if (getItem)
+                yield return StartCoroutine(IEAnim("GrapUnknown4"));
+            else
+                yield return StartCoroutine(IEAnim("Player_Unknown"));
 
             yield return new WaitForSeconds(0.5f);
             eventPlayer = false;
@@ -168,7 +176,11 @@ public class PlayerEvent_2 : PlayerEvent
         // 변신한 상태인 경우
         if(onTrans)
         {
-            string unknow = "Unknown" + this.num;
+            string unknow;
+            if (getItem)
+                unknow = "GrapUnknown" + this.num;
+            else
+                unknow = "Unknown" + this.num;
 
             yield return StartCoroutine(IEAnim(unknow));
 
@@ -245,7 +257,11 @@ public class PlayerEvent_2 : PlayerEvent
         {
             if (!(num == 2))
             {
-                string unknow = "Unknown" + this.num;
+                string unknow;
+                if (getItem)
+                    unknow = "GrapUnknown" + this.num;
+                else
+                    unknow = "Unknown" + this.num;
 
                 yield return StartCoroutine(IEAnim(unknow));
 
@@ -258,7 +274,10 @@ public class PlayerEvent_2 : PlayerEvent
         else 
         {
             // 변신을 안한 경우
-            yield return StartCoroutine(IEAnim("Player_Unknown"));
+            if (getItem)
+                yield return StartCoroutine(IEAnim("GrapUnknown4"));
+            else
+                yield return StartCoroutine(IEAnim("Player_Unknown"));
         
             yield return new WaitForSeconds(0.5f);
             eventPlayer = false;
@@ -268,7 +287,7 @@ public class PlayerEvent_2 : PlayerEvent
 
         player.move = true;
         player.right = true;
-        yield return StartCoroutine(IEMove(new Vector2(5.65f, -6f), 1.2f));
+        yield return StartCoroutine(IEMove(new Vector2(6f, -6.25f), 1.4f));
         player.right = false;
         player.move = false;
 
@@ -280,7 +299,7 @@ public class PlayerEvent_2 : PlayerEvent
         onLaserPlate = true;
 
         player.move = true;
-        yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 1f));
+        yield return StartCoroutine(IEMove(new Vector2(-1f, -2.5f), 1.4f));
         player.move = false;
 
         laserPlate.SetActive(false);
@@ -334,10 +353,6 @@ public class PlayerEvent_2 : PlayerEvent
         {
             animName = $"GrapUnknown{num}";
         }
-        else if (!onLaserPlate)
-        {
-            animName = onTrans ? $"Unknown{num}" : "Player_Unknown";
-        }
         else if (onTrans && num != 1) // 변신을 했는데 1이 아닌 경우
         {
             animName = $"Unknown{num}";
@@ -387,7 +402,11 @@ public class PlayerEvent_2 : PlayerEvent
             // 변신을 했는데 3번이 아닌 경우
             if (!(num == 3))
             {
-                string unknow = "Unknown" + this.num;
+                string unknow;
+                if (getItem)
+                    unknow = "GrapUnknown" + this.num;
+                else
+                    unknow = "Unknown" + this.num;
 
                 yield return StartCoroutine(IEAnim(unknow));
 
@@ -400,7 +419,10 @@ public class PlayerEvent_2 : PlayerEvent
         else
         {
             // 변신을 안한 경우
-            yield return StartCoroutine(IEAnim("Player_Unknown"));
+            if (getItem)
+                yield return StartCoroutine(IEAnim("GrapUnknown4"));
+            else
+                yield return StartCoroutine(IEAnim("Player_Unknown"));
 
             yield return new WaitForSeconds(0.5f);
             eventPlayer = false;
@@ -413,7 +435,11 @@ public class PlayerEvent_2 : PlayerEvent
         {
             if (onTrans)
             {
-                string unknow = "Unknown" + this.num;
+                string unknow;
+                if (getItem)
+                    unknow = "GrapUnknown" + this.num;
+                else
+                    unknow = "Unknown" + this.num;
 
                 yield return StartCoroutine(IEAnim(unknow));
 
@@ -435,7 +461,7 @@ public class PlayerEvent_2 : PlayerEvent
 
         player.move = true;
         player.right = true;
-        yield return StartCoroutine(IEMove(new Vector2(5.65f, -6f), 1.8f));
+        yield return StartCoroutine(IEMove(new Vector2(6.2f, -6.65f), 1.8f));
 
         player.anim.SetBool("UseNipper", true);
         myNipper.UseNipper();
@@ -445,6 +471,7 @@ public class PlayerEvent_2 : PlayerEvent
         getNipper = false;
         player.anim.SetBool("Grap", false);
         onLasetWire = true;
+        laser.OffLaser();
 
         player.right = false;
         player.anim.SetBool("UseNipper", false);
@@ -455,7 +482,9 @@ public class PlayerEvent_2 : PlayerEvent
         eventPlayer = false;
     }
 
+    [SerializeField] private CircleMaskShrinkController maskController;
     [SerializeField] ObjectEvent_2 doorEvent;
+    [SerializeField] ObjectLaser laser;
     private bool onDoor = false;
     public IEnumerator IEDoor() // 문
     {
@@ -463,7 +492,13 @@ public class PlayerEvent_2 : PlayerEvent
 
         if (onDoor)
         {
-            // 탈출
+            // 탈출!
+            Debug.Log("탈출");
+            yield return StartCoroutine(maskController.ShrinkRoutine());
+
+            yield return new WaitForSeconds(3f);
+
+            SceneManager.LoadScene("3Stage");
         }
         else
         {
@@ -482,7 +517,10 @@ public class PlayerEvent_2 : PlayerEvent
             else
             {
                 // 감전
+                player.behind = true;
+                StartCoroutine(laser.IEShotLaser());
                 yield return StartCoroutine(IEAnim("Player_Shock"));
+                player.behind = false;
 
                 player.move = true;
                 yield return StartCoroutine(IEMove(new Vector2(2f, -3.65f), 1f));

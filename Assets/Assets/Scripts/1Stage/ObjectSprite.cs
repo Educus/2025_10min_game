@@ -19,26 +19,21 @@ public class ObjectSprite : MonoBehaviour
         {
             frontObj.SetActive(false);
             sideObj[0].SetActive(false);
-            sideObj[1].SetActive(false);
         }
         else if (player.move == true && player.behind == true)
         {
             frontObj.SetActive(false);
             sideObj[0].SetActive(false);
-            sideObj[1].SetActive(false);
         }
         else if (player.move == true && player.behind == false)
         {
             frontObj.SetActive(false);
             sideObj[0].SetActive(true);
-            sideObj[1].SetActive(true);
-            sideObj[1].GetComponent<SpriteRenderer>().flipX = player.right;
         }
         else
         {
             frontObj.SetActive(true);
             sideObj[0].SetActive(false);
-            sideObj[1].SetActive(false);
         }
     }
 

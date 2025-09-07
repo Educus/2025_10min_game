@@ -11,14 +11,18 @@ public class ObjectEvent_1 : ObjectEvent
     {
         eventObject = true;
 
-        if(!playerEvent_1.onLight) yield break;
+        if (!playerEvent_1.onLight)
+        {
+            eventObject = false;
+            yield break;
+        }
 
         anim.SetBool("OnAnim", true);
 
         if(boneNum >= boneDescription.Length) boneNum = 0;
 
         boneDescription[boneNum].SetActive(true);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
         boneDescription[boneNum].SetActive(false);
         boneNum++;
 

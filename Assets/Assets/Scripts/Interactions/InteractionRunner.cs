@@ -24,7 +24,10 @@ public class InteractionRunner : MonoBehaviour
             {
                 // 조건 만족 X → Player_Unknown 애니메이션 실행
                 if (playerAnimator != null)
+                {
+                    Debug.Log("선행조건 실패");
                     playerAnimator.Play("Player_Unknown");
+                }
                 return;
             }
         }
